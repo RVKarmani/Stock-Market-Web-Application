@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Stock Search</title>
+    <link rel="shortcut icon" href="">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.min.css">
+    <!-- Bootstrap Toggle -->
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <style>
+        body{padding-top:50px;background-color: rgb(59,106,136);}
+        h3{text-align: center;}
+        .wells{background-color: white;}
+        .form-group.required .control-label:after{content: "*";color: red;}
+        #stockinfo{ text-align: center;}
+         .ui-autocomplete-loading {
+    background: white url("images/ui-anim_basic_16x16.gif") right center no-repeat;
+  }
+        .nav-content.active{ display: block;}
+        .nav-content.hide{display:none;}
+          </style>
+
+    <!--[if IE]>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+   
+    
+    </head>
+
+<body>
+   <!--External Scripts-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+ 
+    <script>
+         
+       //$.get("stock1.php", function(data){
+         //  $("#r").html(data);
+     //  })  
+   /*   $(function(){
+          var loaded= false;
+            if(loaded){ return;}
+             $("#name").autocomplete({
+               source:function(request,response){
+                   $.ajax({
+                        url:'stock1.php',
+                        dataType:
+                       "json",
+                        data:{
+                        "q":request.term
+                    },
+                        success:function(data){
+                          response($.map(data, function( item )
+                        {
+                            return{
+                                    label: item.Name,
+                                    value: item.Symbol,
+                                    Sym: item.Exchange
+                                   }
+                        }));
+//response(data);                               
+                        }
+                   });
+             },
+            minLength:1
+           /*focus: function (event, ui) {
+            $("#name").val(ui.item.Name);
+            return false;
+        },
+                 select: function (event, ui) {
+            $("#name").val(ui.item.Name);
+
+            return false;
+        }*/
+            // })
+         /*.data("ui-autocomplete")._renderItem= function(ul,item){
+                 return $("<li>")
+                 .data("item.autocomplete",item)
+                 .append(item.Sym + " - " + item.label + " ( "+item.value +" )")
+                 .appendTo(ul);
+             };*/
+            /* .data("ui-Autocomplete")._renderMenu= function(ul, items) {
+        var self = this;
+        $.each( items, function( index, item ) {
+            ul.append( this.Sym + " - " + this.label + " ( "+this.value +" )");
+            self._renderItemData( ul, item );
+        });
+       loaded=true;
+       
+    };
+      });*/
+        
+     
+        $(function(){
+            //Get quote API
+                    $("button#getquote").on("click",function(e){
+                e.preventDefault();
+                $.ajax({       
+                        type:'GET',
+                        url:'stock1.php',
+                        data:{
+                            "qq":$('#name').val(),
+                            
+                            
+                        },
+                        dataType: "json",
+                        success:function(data){
+                            
+                            //Displaying stock details table
+                            var qhtml="";
+                            qhtml+="<tbody><tr><th>Name</th><td>"+ data.Name + "</td></tr>"
+                                + "<tr><th>Symbol</th><td>" + data.Symbol + "</td></tr>"
+                                + "<tr><th>Last Price</th><td>" + data.LastPrice + "</td></tr>"
+                                + "<tr><th>Change (Change Percent)</th><td>" + data.Change + "("  + data.ChangePercent + ")</td></tr>"
+                                + "<tr><th>Time and Date</th><td>" + data.Timestamp + "</td></tr>"
+                                + "<tr><th>Market Cap</th><td>" + data.MarketCap + "</td></tr>"
+                                + "<tr><th>Volume</th><td>" + data.Volume + "</td></tr>"
+                                + "<tr><th>Change YTD (Change Percent YTD)</th><td>"+data.ChangeYTD + "("+ data.ChangePercentYTD+") </td></tr>"
+                                + "<tr><th>High Price</th><td>"+data.High +"</td></tr>"
+                                + "<tr><th>Low Price</th><td>"+ data.Low + "</td></tr>"
+                                + "<tr><th>Opening Price</th><td>"+ data.Open + "</td></tr></tbody>";
+                                
+                            $("#detail").append(qhtml);  
+                            //Chart api
+                            var chartUrl="<img src='http://chart.finance.yahoo.com/t?s="+$('#name').val()+"&lang=en-US&width=500&height=500'>";
+                            $('#chart').append(chartUrl)
+                        }
+                    }); 
+         });
+                
+            
+         //navigation of tabs
+                    $('.nav-pills > li > a').click(function(event){
+                    event.preventDefault();
+                    //defining selectors
+                    var active_tab_select =$('.nav-pills > li.active > a').attr('href');
+                        //removing the currently active class tab
+                         $(active_tab_select).removeClass('active');
+                        $(active_tab_select).addClass('hide');
+                  
+                        //ass active class to clicked tab
+                        var active_nav = $('nav-pills > li.active');
+                        active_nav.removeClass('active');
+                   
+                    
+                        //displaying the tab content
+                        var x = $(this).attr('href');
+                        $(x).removeClass('hide');
+                        $(x).addClass('active');
+                    
+                    });
+       
+            
+           
+         //historical charts display
+                    $('.nav-pills a[href="#charts"]').click(function(event){
+                                                              
+                    //Parameters definitions for interactive chat data                                                
+                   var cdata ={
+                        "Normalized": false,
+                        "NumberOfDays":1095,
+                        "DataPeriod": "Day",
+                        "Elements":[{
+                            "Symbol": $('#name').val(),
+                            "Type":"price",
+                            "Params":["ohlc"]
+                        }]
+                    };
+                    
+                    $.ajax({
+                        type:'GET',
+                        url:'stock1.php',
+                        data:{
+                            dataObj:JSON.stringify(cdata)
+                        },
+                        dataType:"json",
+                        success: function(data){
+                            renderChartData(data);// function call to display data in charts
+                            
+                        }
+                    });
+        
+                });
+            
+         //Creating historical charts
+                    function renderChartData(data){
+                //alert(data);
+                var ohlc= getOHLC(data);
+                var groups=[
+                    ['week', [1] ],
+                    ['month', [1,3,6,10] ],
+                    ['Year', [1,2] ],
+                    ['YTD'],
+                    ['All']
+                ];
+                //console.log(data);
+                //Creating the chart from the data
+               $('#charts').highcharts('StockChart',{
+                    rangeSelector:{
+                        allButtonsEnabled: true,
+                        buttons:[
+                            {
+                                type:'week',
+                                count:1,
+                                text:'1w',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['day', [1]]]
+                                }
+                            },
+                            {
+                                type:'month',
+                                count:1,
+                                text:'1m',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['day', [1]]]
+                                }
+                            },
+                            {
+                                type:'month',
+                                count:3,
+                                text:'3m',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['day', [1]]]
+                                }
+                            },
+                            {
+                                type:'month',
+                                count:6,
+                                text:'6m',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['day', [1]]]
+                                }
+                            },
+                            {
+                                type:'ytd',
+                                text:'YTD',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['week', [1]]]
+                                }
+                            },
+                            {
+                                type:'year',
+                                count:1,
+                                text:'1y',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['week', [1]]]
+                                }
+                            },
+                            {
+                                type:'all',
+                                text:'All',
+                                dataGrouping: {
+                                    forced: true,
+                                    units: [['month',[1]]]
+                                }
+                            }
+                            
+                        ], selected: 0
+                    },
+                    title:{
+                       text:data.Elements[0].Symbol + " Stock Value"
+                    },
+                    yAxis:{
+                       title:{
+                            text:"Stock Value"
+                       }
+                    },
+                    series:[{
+                        type:'area',
+                        data:ohlc,
+                        name:data.Elements[0].Symbol +" Stock Price",
+                        threshold:null,
+                        tooltip:{
+                            valueDecimals:2
+                        },
+                        fillColor:{
+                            linearGradient:{
+                                x1:0,
+                                y1:0,
+                                x2:0,
+                                y2:1
+                            },
+                       stops:[
+                           [0,Highcharts.getOptions().colors[0]],
+                           [1,Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                       ]
+                   }
+                   }]
+                });              
+            }
+            
+         //Getting the opening. closing ,high and low price for the stock on available dates
+                    function getOHLC(data){
+        
+                var dates=data.Dates||[];
+                var elements= data.Elements||[];
+                var chartSeries=[];
+                if(elements[0]){
+                for(i=0;i<dates.length;i++){
+                    var dat=dateFormat(dates[i])
+                    var pointData=[
+                        dat,
+                        elements[0].DataSeries.open.values[i],
+                        elements[0].DataSeries.high.values[i],
+                        elements[0].DataSeries.low.values[i],
+                        elements[0].DataSeries.close.values[i]     
+                    ]
+                    chartSeries.push(pointData);
+                };
+                }
+                return chartSeries;
+            }
+            
+         //Converting the input date to fixed format
+                    function dateFormat(dateInput){
+                var datObj = new Date(dateInput);
+                return Date.UTC(datObj.getFullYear(), datObj.getMonth(), datObj.getDate());
+            }
+            
+        //Google news API
+                    $('.nav-pills a[href="#news"]').click(function(event){
+                        
+                        // Get local Ip address
+                      /*  var ip = $.get('http://jsonip.com/',
+                                function(ipaddr){
+                                function news(ipaddr){
+
+                                }
+                                },"json");
+                        console.log(ip);*/
+                            $.ajax({
+                                type:'GET',
+                                url:'stock1.php',
+                                dataType:"json",
+                                data:{
+                                    ver:'1.0',
+                                    newsFeed:$('#name').val(),
+                                    userIP:'cs-server.usc.edu'
+                                },
+                                success: function(data){
+                                   console.log(data);
+                                }
+                            });            
+                    });
+        
+        
+        
+        });
+    </script>
+    
+    <!--Form-->
+    <div class="container">
+    <div class="well">
+        <!-- Basic form-->
+       <form role="form">
+        <h3>Stock Market Search</h3>
+        <div class="form-group row required">
+            
+            <label for="name" class="control-label col-lg-3">Enter the stock Name or Symbol:</label>
+            
+            <!-- Search Box-->
+            <div class="col-lg-6">
+                <input type="text" id="name" class="form-control">
+            
+            </div>
+            
+
+            <!--Buttons-->
+            <div class="col-lg-3">
+                <button type="submit"class="btn btn-primary" id="getquote"><span class="glyphicon glyphicon-search"></span>&nbsp;GetQuote</button>
+                <button type="reset" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Clear</button>
+            </div>    
+        </div>
+        <!-- link to API-->   
+        <div class="form-group row">
+            <div class="col-lg-offset-9">
+                <label for="cite">Powered By:</label>       
+                <a href="http://dev.markitondemand.com/MODApis/" target="_blank" id="cite">
+                    <img src="mod-logo.png" alt="MarketOnDemand Logo" width="120">  
+                </a>
+            </div>
+        </div>
+     
+       </form>
+        </div>
+        <hr>
+        <div id="result" class="carousel slide">
+            <div class="carousel-inner">
+                <div class="item active">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <div class="col-lg-3">  Favourite List
+                        </div>
+                    <div class="col-lg-offset-9">Automatic Refresh:&nbsp;<input checked data-toggle="toggle" type="checkbox">
+                    <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-refresh"></span></button>
+                        <a href="#result" data-slide="next"><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-chevron-right"></span></button></a></div></div>
+                    <div class="panel-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Company Name</th>
+                                    <th>Stock Price</th>
+                                    <th>Change(Change Percent)</th>
+                                    <th>Market Cap</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+        
+        </div>
+        <div class="item">
+                <div class="panel panel-default">
+                    <div class="col-lg-1"><a href="#result" data-slide="prev"><button class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span></button></a></div>
+                    <div class="panel-heading" id="stockinfo">Stock Details</div>
+                    
+                    <div class="panel-body">
+                        <ul class="nav nav-pills">
+                            <li class="active"><a href="#start" data-toggle="tab"><span class="glyphicon glyphicon-dashboard">&nbsp;</span>Current Stock</a></li>
+                            <li><a href="#charts" data-toggle="tab"><span class="glyphicon glyphicon-stats">&nbsp;</span>Charts</a></li>
+                            <li><a href="#news" data-toggle="tab"><span class="glyphicon glyphicon-link">&nbsp;</span>News feed</a></li>
+                        </ul>
+                        
+                        <div id="start" class="nav-content active">
+                        <div  class="col-lg-6">
+                        <table class="table table-striped" id="detail">
+                                <thead>
+                                    <th> Stock Details</th>
+                                </thead>
+                                <!-- stock table-->
+                        </table>
+                        <!--table--></div>
+                        <div id="chart" class="col-lg-6">
+                          
+                            <!-- chart-->
+                           
+                        </div>
+                        </div>
+                        <div id="charts" class="nav-content hide"></div>
+                        <div id="news" class="nav-content hide"></div>
+                    </div>
+            </div>
+        </div>
+    </div>
+        </div>
+   // <div id="r">hi</div>
+    </div>
+        
+    </body>
+</html>
